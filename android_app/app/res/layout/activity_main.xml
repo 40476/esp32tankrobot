@@ -1,0 +1,351 @@
+ <?xml version="1.0" encoding="utf-8"?>
+ <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+     xmlns:app="http://schemas.android.com/apk/res-auto"
+     android:layout_width="match_parent"
+     android:layout_height="match_parent"
+     android:orientation="vertical"
+     android:padding="16dp"
+     android:background="@color/background">
+
+     <!-- Connection Status -->
+     <TextView
+         android:id="@+id/connectionStatus"
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content"
+         android:text="Disconnected"
+         android:textColor="@color/red"
+         android:textSize="18sp"
+         android:textStyle="bold"
+         android:gravity="center"
+         android:layout_marginBottom="16dp" />
+
+     <!-- Connection Buttons -->
+     <LinearLayout
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content"
+         android:orientation="horizontal"
+         android:layout_marginBottom="24dp"
+         android:gravity="center">
+
+         <Button
+             android:id="@+id/connectButton"
+             android:layout_width="0dp"
+             android:layout_height="wrap_content"
+             android:layout_weight="1"
+             android:layout_marginEnd="8dp"
+             android:text="Connect"
+             android:textSize="16sp" />
+
+         <Button
+             android:id="@+id/disconnectButton"
+             android:layout_width="0dp"
+             android:layout_height="wrap_content"
+             android:layout_weight="1"
+             android:layout_marginStart="8dp"
+             android:text="Disconnect"
+             android:textSize="16sp"
+             android:enabled="false" />
+     </LinearLayout>
+
+     <!-- Main Control Area -->
+     <LinearLayout
+         android:layout_width="match_parent"
+         android:layout_height="0dp"
+         android:layout_weight="1"
+         android:orientation="horizontal">
+
+         <!-- Left Tank Control -->
+         <LinearLayout
+             android:layout_width="0dp"
+             android:layout_height="match_parent"
+             android:layout_weight="1"
+             android:orientation="vertical"
+             android:gravity="center"
+             android:layout_marginEnd="8dp">
+
+             <TextView
+                 android:layout_width="wrap_content"
+                 android:layout_height="wrap_content"
+                 android:text="LEFT TRACK"
+                 android:textSize="14sp"
+                 android:textStyle="bold"
+                 android:layout_marginBottom="8dp" />
+
+             <TextView
+                 android:id="@+id/leftTankValue"
+                 android:layout_width="wrap_content"
+                 android:layout_height="wrap_content"
+                 android:text="0"
+                 android:textSize="24sp"
+                 android:textStyle="bold"
+                 android:layout_marginBottom="16dp" />
+
+ 			<io.github.usr40k.esp32tankrobot.views.VerticalSeekBar
+     			android:id="@+id/leftTankSeekBar"
+     			android:layout_width="wrap_content"
+     			android:layout_height="200dp"
+     			android:max="400"
+     			android:progress="200" />
+
+             <Button
+                 android:id="@+id/tankStopButton"
+                 android:layout_width="wrap_content"
+                 android:layout_height="wrap_content"
+                 android:text="STOP"
+                 android:textSize="14sp" />
+         </LinearLayout>
+
+         <!-- Center Arm Controls -->
+         <LinearLayout
+             android:layout_width="0dp"
+             android:layout_height="match_parent"
+             android:layout_weight="1.5"
+             android:orientation="vertical"
+             android:gravity="center"
+             android:layout_marginStart="8dp"
+             android:layout_marginEnd="8dp">
+
+             <TextView
+                 android:layout_width="wrap_content"
+                 android:layout_height="wrap_content"
+                 android:text="ARM CONTROLS"
+                 android:textSize="16sp"
+                 android:textStyle="bold"
+                 android:layout_marginBottom="16dp" />
+
+             <!-- Motor Selector -->
+             <Spinner
+                 android:id="@+id/motorSpinner"
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content"
+                 android:layout_marginBottom="16dp" />
+
+             <!-- Motor Control Buttons -->
+             <LinearLayout
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content"
+                 android:orientation="vertical"
+                 android:layout_marginBottom="16dp">
+
+                 <TextView
+                     android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:text="Claw Grab"
+                     android:textSize="12sp"
+                     android:layout_marginBottom="4dp" />
+
+                 <LinearLayout
+                     android:layout_width="match_parent"
+                     android:layout_height="wrap_content"
+                     android:orientation="horizontal">
+
+                     <Button
+                         android:id="@+id/clawGrabForward"
+                         android:layout_width="0dp"
+                         android:layout_height="wrap_content"
+                         android:layout_weight="1"
+                         android:text="GRAB"
+                         android:textSize="12sp"
+                         android:layout_marginEnd="4dp" />
+
+                     <Button
+                         android:id="@+id/clawGrabBackward"
+                         android:layout_width="0dp"
+                         android:layout_height="wrap_content"
+                         android:layout_weight="1"
+                         android:text="RELEASE"
+                         android:textSize="12sp"
+                         android:layout_marginStart="4dp" />
+                 </LinearLayout>
+             </LinearLayout>
+
+             <LinearLayout
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content"
+                 android:orientation="vertical"
+                 android:layout_marginBottom="16dp">
+
+                 <TextView
+                     android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:text="Claw Rotate"
+                     android:textSize="12sp"
+                     android:layout_marginBottom="4dp" />
+
+                 <LinearLayout
+                     android:layout_width="match_parent"
+                     android:layout_height="wrap_content"
+                     android:orientation="horizontal">
+
+                     <Button
+                         android:id="@+id/clawRotateForward"
+                         android:layout_width="0dp"
+                         android:layout_height="wrap_content"
+                         android:layout_weight="1"
+                         android:text="CW"
+                         android:textSize="12sp"
+                         android:layout_marginEnd="4dp" />
+
+                     <Button
+                         android:id="@+id/clawRotateBackward"
+                         android:layout_width="0dp"
+                         android:layout_height="wrap_content"
+                         android:layout_weight="1"
+                         android:text="CCW"
+                         android:textSize="12sp"
+                         android:layout_marginStart="4dp" />
+                 </LinearLayout>
+             </LinearLayout>
+
+             <LinearLayout
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content"
+                 android:orientation="vertical"
+                 android:layout_marginBottom="16dp">
+
+                 <TextView
+                     android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:text="Middle Reach"
+                     android:textSize="12sp"
+                     android:layout_marginBottom="4dp" />
+
+                 <LinearLayout
+                     android:layout_width="match_parent"
+                     android:layout_height="wrap_content"
+                     android:orientation="horizontal">
+
+                     <Button
+                         android:id="@+id/middleReachForward"
+                         android:layout_width="0dp"
+                         android:layout_height="wrap_content"
+                         android:layout_weight="1"
+                         android:text="OUT"
+                         android:textSize="12sp"
+                         android:layout_marginEnd="4dp" />
+
+                     <Button
+                         android:id="@+id/middleReachBackward"
+                         android:layout_width="0dp"
+                         android:layout_height="wrap_content"
+                         android:layout_weight="1"
+                         android:text="IN"
+                         android:textSize="12sp"
+                         android:layout_marginStart="4dp" />
+                 </LinearLayout>
+             </LinearLayout>
+
+             <LinearLayout
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content"
+                 android:orientation="vertical"
+                 android:layout_marginBottom="16dp">
+
+                 <TextView
+                     android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:text="Base Reach"
+                     android:textSize="12sp"
+                     android:layout_marginBottom="4dp" />
+
+                 <LinearLayout
+                     android:layout_width="match_parent"
+                     android:layout_height="wrap_content"
+                     android:orientation="horizontal">
+
+                     <Button
+                         android:id="@+id/baseReachForward"
+                         android:layout_width="0dp"
+                         android:layout_height="wrap_content"
+                         android:layout_weight="1"
+                         android:text="UP"
+                         android:textSize="12sp"
+                         android:layout_marginEnd="4dp" />
+
+                     <Button
+                         android:id="@+id/baseReachBackward"
+                         android:layout_width="0dp"
+                         android:layout_height="wrap_content"
+                         android:layout_weight="1"
+                         android:text="DOWN"
+                         android:textSize="12sp"
+                         android:layout_marginStart="4dp" />
+                 </LinearLayout>
+             </LinearLayout>
+
+             <!-- Stop Controls -->
+             <LinearLayout
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content"
+                 android:orientation="horizontal"
+                 android:layout_marginTop="8dp">
+
+                 <Button
+                     android:id="@+id/stopSelectedMotor"
+                     android:layout_width="0dp"
+                     android:layout_height="wrap_content"
+                     android:layout_weight="1"
+                     android:text="STOP MOTOR"
+                     android:textSize="14sp"
+                     android:layout_marginEnd="4dp" />
+
+                 <Button
+                     android:id="@+id/stopAllButton"
+                     android:layout_width="0dp"
+                     android:layout_height="wrap_content"
+                     android:layout_weight="1"
+                     android:text="STOP ALL"
+                     android:textSize="14sp"
+                     android:layout_marginStart="4dp"
+                     android:backgroundTint="@color/red" />
+             </LinearLayout>
+         </LinearLayout>
+
+         <!-- Right Tank Control -->
+         <LinearLayout
+             android:layout_width="0dp"
+             android:layout_height="match_parent"
+             android:layout_weight="1"
+             android:orientation="vertical"
+             android:gravity="center"
+             android:layout_marginStart="8dp">
+
+             <TextView
+                 android:layout_width="wrap_content"
+                 android:layout_height="wrap_content"
+                 android:text="RIGHT TRACK"
+                 android:textSize="14sp"
+                 android:textStyle="bold"
+                 android:layout_marginBottom="8dp" />
+
+             <TextView
+                 android:id="@+id/rightTankValue"
+                 android:layout_width="wrap_content"
+                 android:layout_height="wrap_content"
+                 android:text="0"
+                 android:textSize="24sp"
+                 android:textStyle="bold"
+                 android:layout_marginBottom="16dp" />
+
+             <SeekBar
+                 android:id="@+id/rightTankSeekBar"
+                 android:layout_width="120dp"
+                 android:layout_height="wrap_content"
+                 android:layout_marginBottom="16dp" />
+
+              <io.github.usr40k.esp32tankrobot.views.VerticalSeekBar
+     			android:id="@+id/rightTankSeekBar"
+     			android:layout_width="wrap_content"
+			     android:layout_height="200dp"
+     			android:max="400"
+     			android:progress="200" />
+
+             <Button
+                 android:id="@+id/tankStopButton2"
+                 android:layout_width="wrap_content"
+                 android:layout_height="wrap_content"
+                 android:text="STOP"
+                 android:textSize="14sp" />
+         </LinearLayout>
+     </LinearLayout>
+ </LinearLayout>
