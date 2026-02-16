@@ -28,16 +28,32 @@ jobs:
         path: |
           ~/.gradle/caches
           ~/.gradle/wrapper
-        key: ${{ runner.os }}-gradle-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
+        key: ${{ runner.os }}-gradle-${{ hashFiles('android_app/gradle/wrapper/gradle-wrapper.properties') }}
 
     - name: Make gradlew executable
-      run: chmod +x android_app/gradlew
+      working-directory: android_app
+      run: chmod +x gradlew
 
     - name: Build Debug APK
-      run: android_app/gradlew assembleDebug --no-daemon --stacktrace --info
+      working-directory: android_app
+      run: ./gradlew assembleDebug --no-daemon --stacktrace --info
 
-    - name: Upload APK
+    - name: List APKs
+      run: |
+        echo "=== Looking for APK ==="
+        find . -name "*.apk" -type f 2>/dev/null || echo "No APK found in root"
+        echo ""
+        echo "=== In android_app/ ==="
+        find android_app -name "*.apk" -type f 2>/dev/null || echo "No APK in android_app/"
+        echo ""
+        echo "=== Build output directories ==="
+        ls -la android_app/app/build/outputs/apk/ 2>/dev/null || echo "No apk directory"
+        ls -la android_app/app/build/outputs/apk/debug/ 2>/dev/null || echo "No debug directory"
+
+    - name: Upload APK artifacts
       uses: actions/upload-artifact@v4
       with:
         name: tank-apk
-        path: android_app/app/build/outputs/apk/debug/*.apk
+        path: |
+          android_app/app/build/outputs/apk/debug/*.apk
+          android_app/app/build/outputs/apk/**/*.apk
