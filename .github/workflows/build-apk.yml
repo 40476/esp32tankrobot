@@ -1,17 +1,22 @@
-name: Build for android
+name: Android Build
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-    - name: Set up JDK 17
+     - name: Setup JDK 17
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
@@ -20,40 +25,65 @@ jobs:
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
       with:
-        packages: "platforms;android-34 platforms;android-22 build-tools;34.0.0"
+        api-level: 34
+        build-tools: '34.0.0'
+        ndk: '25.2.9519653'
+        cmake: '3.22.1'
 
-    - name: Cache Gradle
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/wrapper
-        key: ${{ runner.os }}-gradle-${{ hashFiles('android_app/gradle/wrapper/gradle-wrapper.properties') }}
-
-    - name: Make gradlew executable
-      working-directory: android_app
-      run: chmod +x gradlew
-
-    - name: Build Debug APK
-      working-directory: android_app
-      run: ./gradlew assembleDebug --no-daemon --stacktrace --info
-
-    - name: List APKs
+    - name: Decode keystore (if needed)
+      if: env.SIGNING_KEY != ''
       run: |
-        echo "=== Looking for APK ==="
-        find . -name "*.apk" -type f 2>/dev/null || echo "No APK found in root"
-        echo ""
-        echo "=== In android_app/ ==="
-        find android_app -name "*.apk" -type f 2>/dev/null || echo "No APK in android_app/"
-        echo ""
-        echo "=== Build output directories ==="
-        ls -la android_app/app/build/outputs/apk/ 2>/dev/null || echo "No apk directory"
-        ls -la android_app/app/build/outputs/apk/debug/ 2>/dev/null || echo "No debug directory"
+        echo "$SIGNING_KEY" | base64 -d > ${{ runner.temp }}/keystore.jks
+      env:
+        SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
 
-    - name: Upload APK artifacts
+    - name: Build with Gradle
+      working-directory: ./android_app
+      run: |
+        # Set up local.properties with SDK path
+        echo "sdk.dir=$ANDROID_HOME" > local.properties
+
+        # Optional: Configure signing if keystore exists
+        if [ -f "${{ runner.temp }}/keystore.jks" ]; then
+          echo "KEYSTORE_FILE=${{ runner.temp }}/keystore.jks" >> local.properties
+          echo "KEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}" >> local.properties
+          echo "KEY_ALIAS=${{ secrets.KEY_ALIAS }}" >> local.properties
+          echo "KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}" >> local.properties
+        fi
+
+        # Make gradlew executable and build
+        chmod +x gradlew
+        ./gradlew assembleRelease --no-daemon --stacktrace
+
+    - name: Find APK files
+      id: apks
+      working-directory: ./android_app
+      run: |
+        # Find all APK files in build outputs
+        APK_PATHS=$(find . -name "*.apk" -path "*/build/outputs/*" | sort)
+        echo "apk_paths<<EOF" >> $GITHUB_OUTPUT
+        echo "$APK_PATHS" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+
+        # Create a zip with build info
+        echo "Build timestamp: $(date)" > build-info.txt
+        echo "Git commit: $GITHUB_SHA" >> build-info.txt
+        echo "Git ref: $GITHUB_REF" >> build-info.txt
+
+    - name: Upload all APKs as artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: tank-apk
+        name: android-apks-${{ github.run_number }}
         path: |
-          android_app/app/build/outputs/apk/debug/*.apk
-          android_app/app/build/outputs/apk/**/*.apk
+          android_app/**/build/outputs/**/*.apk
+          android_app/build-info.txt
+        retention-days: 14
+        if-no-files-found: error
+
+    - name: Upload mapping file (if ProGuard/R8 was used)
+      uses: actions/upload-artifact@v4
+      with:
+        name: mapping-file-${{ github.run_number }}
+        path: android_app/**/build/outputs/mapping/release/*.txt
+        retention-days: 30
+        if-no-files-found: ignore
