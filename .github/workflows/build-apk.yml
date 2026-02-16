@@ -1,27 +1,22 @@
 name: Android Build
-
 on:
   push:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
-
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-
-     - name: Setup JDK 17
+    - name: Setup JDK 17
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
         java-version: '17'
-
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
       with:
@@ -29,20 +24,17 @@ jobs:
         build-tools: '34.0.0'
         ndk: '25.2.9519653'
         cmake: '3.22.1'
-
     - name: Decode keystore (if needed)
       if: env.SIGNING_KEY != ''
       run: |
         echo "$SIGNING_KEY" | base64 -d > ${{ runner.temp }}/keystore.jks
       env:
         SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
-
     - name: Build with Gradle
       working-directory: ./android_app
       run: |
         # Set up local.properties with SDK path
         echo "sdk.dir=$ANDROID_HOME" > local.properties
-
         # Optional: Configure signing if keystore exists
         if [ -f "${{ runner.temp }}/keystore.jks" ]; then
           echo "KEYSTORE_FILE=${{ runner.temp }}/keystore.jks" >> local.properties
@@ -50,11 +42,9 @@ jobs:
           echo "KEY_ALIAS=${{ secrets.KEY_ALIAS }}" >> local.properties
           echo "KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}" >> local.properties
         fi
-
         # Make gradlew executable and build
         chmod +x gradlew
         ./gradlew assembleRelease --no-daemon --stacktrace
-
     - name: Find APK files
       id: apks
       working-directory: ./android_app
@@ -64,12 +54,10 @@ jobs:
         echo "apk_paths<<EOF" >> $GITHUB_OUTPUT
         echo "$APK_PATHS" >> $GITHUB_OUTPUT
         echo "EOF" >> $GITHUB_OUTPUT
-
         # Create a zip with build info
         echo "Build timestamp: $(date)" > build-info.txt
         echo "Git commit: $GITHUB_SHA" >> build-info.txt
         echo "Git ref: $GITHUB_REF" >> build-info.txt
-
     - name: Upload all APKs as artifacts
       uses: actions/upload-artifact@v4
       with:
@@ -79,7 +67,6 @@ jobs:
           android_app/build-info.txt
         retention-days: 14
         if-no-files-found: error
-
     - name: Upload mapping file (if ProGuard/R8 was used)
       uses: actions/upload-artifact@v4
       with:
