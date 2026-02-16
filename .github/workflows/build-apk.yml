@@ -31,13 +31,13 @@ jobs:
         key: ${{ runner.os }}-gradle-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
 
     - name: Make gradlew executable
-      run: chmod +x gradlew
+      run: chmod +x android_app/gradlew
 
     - name: Build Debug APK
-      run: ./gradlew assembleDebug --no-daemon --stacktrace --info
+      run: android_app/gradlew assembleDebug --no-daemon --stacktrace --info
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: tank-apk
-        path: app/build/outputs/apk/debug/*.apk
+        path: android_app/app/build/outputs/apk/debug/*.apk
