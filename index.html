@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP32 Tank Robot Controller</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #0ea5e9;
+        }
+
+        h1 {
+            color: #38bdf8;
+            margin-bottom: 5px;
+            font-size: 2rem;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1rem;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 10px 15px;
+            background: rgba(30, 41, 59, 0.7);
+            border-radius: 8px;
+            border: 1px solid #475569;
+        }
+
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .connected {
+            background-color: #22c55e;
+            box-shadow: 0 0 8px #22c55e;
+        }
+
+        .disconnected {
+            background-color: #ef4444;
+            box-shadow: 0 0 8px #ef4444;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: #0ea5e9;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0284c7;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .controller-ui {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex: 1;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+            gap: 40px;
+        }
+
+        .tank-control {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(30, 41, 59, 0.7);
+            border-radius: 16px;
+            padding: 20px 15px;
+            width: 100px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid #475569;
+        }
+
+        .tank-label {
+            margin-bottom: 15px;
+            font-weight: bold;
+            color: #38bdf8;
+            font-size: 1.1rem;
+        }
+
+        .value-display {
+            background: #1e293b;
+            padding: 6px 12px;
+            border-radius: 4px;
+            margin-top: 15px;
+            font-family: monospace;
+            font-size: 1.1rem;
+            color: #22c55e;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .vertical-slider-container {
+            height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .vertical-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 40px;
+            height: 250px;
+            background: #475569;
+            border-radius: 20px;
+            outline: none;
+            writing-mode: bt-lr; /* IE */
+            -webkit-appearance: slider-vertical; /* WebKit */
+        }
+
+        /* Fallback for browsers that don't support vertical sliders */
+        .vertical-slider-fallback {
+            width: 40px;
+            height: 250px;
+            background: #475569;
+            border-radius: 20px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .slider-thumb {
+            position: absolute;
+            width: 50px;
+            height: 25px;
+            background: #0ea5e9;
+            border-radius: 4px;
+            left: -5px;
+            cursor: grab;
+            border: 2px solid #38bdf8;
+        }
+
+        .slider-thumb:active {
+            cursor: grabbing;
+        }
+
+        .center-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .control-group {
+            background: rgba(30, 41, 59, 0.7);
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid #475569;
+        }
+
+        .control-group h3 {
+            color: #38bdf8;
+            margin-bottom: 12px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .buttons-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+        }
+
+        .control-btn {
+            padding: 10px 5px;
+            border: 1px solid #64748b;
+            border-radius: 6px;
+            background: #334155;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .control-btn:hover {
+            background: #475569;
+            transform: translateY(-2px);
+        }
+
+        .control-btn:active {
+            transform: translateY(0);
+            background: #1e293b;
+        }
+
+        .control-btn span {
+            font-size: 0.7rem;
+            color: #94a3b8;
+        }
+
+        .main-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .log-container {
+            margin-top: 20px;
+            max-width: 800px;
+            width: 100%;
+            background: rgba(15, 23, 42, 0.8);
+            border-radius: 8px;
+            padding: 15px;
+            border: 1px solid #475569;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .log-title {
+            color: #38bdf8;
+            margin-bottom: 10px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #logContent {
+            font-family: monospace;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            color: #a5f3fc;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .log-entry {
+            margin-bottom: 3px;
+        }
+
+        .log-sent {
+            color: #4ade80;
+        }
+
+        .log-received {
+            color: #fbbf24;
+        }
+
+        .log-error {
+            color: #f87171;
+        }
+
+        .help-text {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1e293b;
+            border: 2px solid #0ea5e9;
+            border-radius: 12px;
+            padding: 25px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .help-text.visible {
+            display: block;
+        }
+
+        .help-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 999;
+        }
+
+        .help-overlay.visible {
+            display: block;
+        }
+
+        .help-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            color: #38bdf8;
+        }
+
+        .close-help {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-help:hover {
+            color: white;
+        }
+
+        .help-content {
+            color: #e2e8f0;
+            line-height: 1.6;
+        }
+
+        .help-content h3 {
+            color: #38bdf8;
+            margin: 15px 0 8px 0;
+        }
+
+        .help-content code {
+            background: #334155;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: monospace;
+            color: #fbbf24;
+        }
+
+        .help-content ul {
+            padding-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .help-content li {
+            margin-bottom: 5px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #94a3b8;
+            font-size: 0.9rem;
+            padding: 10px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 700px) {
+            .controller-ui {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .tank-control {
+                width: 100%;
+                max-width: 200px;
+            }
+
+            .vertical-slider-container {
+                height: 200px;
+            }
+
+            .vertical-slider {
+                height: 200px;
+            }
+
+            .slider-thumb {
+                height: 20px;
+            }
+        }
+
+        /* Animation for active buttons */
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(14, 165, 233, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0); }
+        }
+
+        .active-btn {
+            animation: pulse 1s infinite;
+            background: #0ea5e9 !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>ESP32 Tank Robot Controller</h1>
+        <div class="subtitle">Bluetooth Serial Control Interface</div>
+    </div>
+
+    <div class="status-bar">
+        <div class="connection-status">
+            <span class="status-indicator disconnected" id="statusIndicator"></span>
+            <span id="statusText">Disconnected</span>
+        </div>
+        <div>
+            <button class="btn btn-primary" id="connectBtn">Connect to Robot</button>
+            <button class="btn btn-danger" id="disconnectBtn" disabled>Disconnect</button>
+        </div>
+    </div>
+
+    <div class="controller-ui">
+        <!-- Left Tank Motor Control -->
+        <div class="tank-control">
+            <div class="tank-label">LEFT MOTOR</div>
+            <div class="vertical-slider-container">
+                <input type="range" min="-200" max="200" value="0" class="vertical-slider" id="leftSlider">
+            </div>
+            <div class="value-display" id="leftValue">0</div>
+        </div>
+
+        <!-- Center Controls -->
+        <div class="center-controls">
+            <!-- Claw Controls -->
+            <div class="control-group">
+                <h3>CLAW GRAB (M0)</h3>
+                <div class="buttons-grid">
+                    <button class="control-btn" data-cmd="m0f">
+                        Forward (F)
+                        <span>m0f</span>
+                    </button>
+                    <button class="control-btn" data-cmd="m0s">
+                        Stop (S)
+                        <span>m0s</span>
+                    </button>
+                    <button class="control-btn" data-cmd="m0b">
+                        Backward (B)
+                        <span>m0b</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Claw Rotate Controls -->
+            <div class="control-group">
+                <h3>CLAW ROTATE (M1)</h3>
+                <div class="buttons-grid">
+                    <button class="control-btn" data-cmd="m1f">
+                        Forward (F)
+                        <span>m1f</span>
+                    </button>
+                    <button class="control-btn" data-cmd="m1s">
+                        Stop (S)
+                        <span>m1s</span>
+                    </button>
+                    <button class="control-btn" data-cmd="m1b">
+                        Backward (B)
+                        <span>m1b</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Reach Controls -->
+            <div class="control-group">
+                <h3>REACH CONTROLS</h3>
+                <div style="display: flex; gap: 10px;">
+                    <div style="flex: 1;">
+                        <div style="text-align: center; margin-bottom: 8px; color: #94a3b8;">Middle (M2)</div>
+                        <div class="buttons-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+                            <button class="control-btn" data-cmd="m2f">F</button>
+                            <button class="control-btn" data-cmd="m2s">S</button>
+                            <button class="control-btn" data-cmd="m2b">B</button>
+                        </div>
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="text-align: center; margin-bottom: 8px; color: #94a3b8;">Base (M3)</div>
+                        <div class="buttons-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+                            <button class="control-btn" data-cmd="m3f">F</button>
+                            <button class="control-btn" data-cmd="m3s">S</button>
+                            <button class="control-btn" data-cmd="m3b">B</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Actions -->
+            <div class="main-actions">
+                <button class="btn btn-primary" id="stopAllBtn">STOP ALL (s)</button>
+                <button class="btn btn-primary" id="helpBtn">HELP (h)</button>
+            </div>
+        </div>
+
+        <!-- Right Tank Motor Control -->
+        <div class="tank-control">
+            <div class="tank-label">RIGHT MOTOR</div>
+            <div class="vertical-slider-container">
+                <input type="range" min="-200" max="200" value="0" class="vertical-slider" id="rightSlider">
+            </div>
+            <div class="value-display" id="rightValue">0</div>
+        </div>
+    </div>
+
+    <!-- Communication Log -->
+    <div class="log-container">
+        <div class="log-title">
+            <span>Communication Log</span>
+            <button class="btn" style="padding: 4px 8px; font-size: 0.8rem;" id="clearLogBtn">Clear</button>
+        </div>
+        <div id="logContent"></div>
+    </div>
+
+    <!-- Help Modal -->
+    <div class="help-overlay" id="helpOverlay"></div>
+    <div class="help-text" id="helpText">
+        <div class="help-header">
+            <h2>Tank Robot Commands</h2>
+            <button class="close-help" id="closeHelp">&times;</button>
+        </div>
+        <div class="help-content">
+            <h3>TANK CONTROL (with PWM speed control 0-200)</h3>
+            <ul>
+                <li><code>ts</code> - Stop tank (should be called every 2 seconds when tank sliders are at 0)</li>
+                <li><code>tms&lt;L&gt;&lt;R&gt;</code> - Set tank motors separately (e.g.,
+<code>tms150-100</code>)</li>
+                <li>Note: Speeds 0-200. Negative values = reverse.</li>
+            </ul>
+
+            <h3>CLAW & REACH (always full speed)</h3>
+            <ul>
+                <li><code>m0f</code> - Claw Grab forward</li>
+                <li><code>m0b</code> - Claw Grab backward</li>
+                <li><code>m0s</code> - Claw Grab stop</li>
+                <li><code>m1f</code> - Claw Rotate forward</li>
+                <li><code>m1s</code> - Claw rotate stop</li>
+                <li><code>m1b</code> - Claw Rotate backward</li>
+                <li><code>m2f</code> - Middle Reach forward</li>
+                <li><code>m2s</code> - Middle Reach stop</li>
+                <li><code>m2b</code> - Middle Reach backward</li>
+                <li><code>m3f</code> - Base Reach forward</li>
+                <li><code>m3s</code> - Base Reach stop</li>
+                <li><code>m3b</code> - Base Reach backward</li>
+            </ul>
+
+            <h3>GLOBAL COMMANDS</h3>
+            <ul>
+                <li><code>s</code> - Stop all motors</li>
+                <li><code>h</code> - Show this help</li>
+            </ul>
+
+            <p><strong>Note:</strong> Commands must be terminated with a newline character (automatically added by
+this interface).</p>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Web Bluetooth Controller for ESP32 Tank Robot | Uses Web Bluetooth API (requires Chrome/Edge on HTTPS or
+localhost)</p>
+    </div>
+
+    <script>
+        // Global variables
+        let bluetoothDevice = null;
+        let server = null;
+        let txCharacteristic = null;
+        let rxCharacteristic = null;
+        let stopInterval = null;
+        let lastTankCommand = null;
+        let isConnected = false;
+
+        // DOM Elements
+        const connectBtn = document.getElementById('connectBtn');
+        const disconnectBtn = document.getElementById('disconnectBtn');
+        const leftSlider = document.getElementById('leftSlider');
+        const rightSlider = document.getElementById('rightSlider');
+        const leftValue = document.getElementById('leftValue');
+        const rightValue = document.getElementById('rightValue');
+        const statusIndicator = document.getElementById('statusIndicator');
+        const statusText = document.getElementById('statusText');
+        const logContent = document.getElementById('logContent');
+        const clearLogBtn = document.getElementById('clearLogBtn');
+        const stopAllBtn = document.getElementById('stopAllBtn');
+        const helpBtn = document.getElementById('helpBtn');
+        const helpText = document.getElementById('helpText');
+        const helpOverlay = document.getElementById('helpOverlay');
+        const closeHelp = document.getElementById('closeHelp');
+
+        // UUIDs for Nordic UART Service (NUS) - standard for BLE serial
+        const SERVICE_UUID = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
+        const TX_CHARACTERISTIC_UUID = '6e400002-b5a3-f393-e0a9-e50e24dcca9e'; // Write
+        const RX_CHARACTERISTIC_UUID = '6e400003-b5a3-f393-e0a9-e50e24dcca9e'; // Notify
+
+        // Initialize
+        function init() {
+            // Check Web Bluetooth support
+            if (!navigator.bluetooth) {
+                log('Web Bluetooth not supported in this browser. Use Chrome or Edge.', 'error');
+                connectBtn.disabled = true;
+                return;
+            }
+
+            // Set up event listeners
+            connectBtn.addEventListener('click', connect);
+            disconnectBtn.addEventListener('click', disconnect);
+            leftSlider.addEventListener('input', handleTankSliderChange);
+            rightSlider.addEventListener('input', handleTankSliderChange);
+            stopAllBtn.addEventListener('click', () => sendCommand('s'));
+            helpBtn.addEventListener('click', showHelp);
+            closeHelp.addEventListener('click', hideHelp);
+            helpOverlay.addEventListener('click', hideHelp);
+            clearLogBtn.addEventListener('click', () => {
+                logContent.innerHTML = '';
+            });
+
+            // Set up control buttons
+            document.querySelectorAll('.control-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const cmd = btn.getAttribute('data-cmd');
+                    sendCommand(cmd);
+
+                    // Add visual feedback
+                    btn.classList.add('active-btn');
+                    setTimeout(() => btn.classList.remove('active-btn'), 300);
+                });
+            });
+
+            // Add fallback slider support for browsers without vertical slider support
+            if (!('appearance' in document.documentElement.style) ||
+                (!CSS.supports('appearance', 'slider-vertical') && !CSS.supports('writing-mode', 'vertical-lr'))) {
+                setupSliderFallback(leftSlider);
+                setupSliderFallback(rightSlider);
+            }
+
+            log('Ready. Click "Connect to Robot" to pair with your ESP32.', 'info');
+        }
+
+        // Fallback slider for browsers without native vertical slider support
+        function setupSliderFallback(slider) {
+            const container = slider.parentElement;
+            const fallback = document.createElement('div');
+            fallback.className = 'vertical-slider-fallback';
+            fallback.dataset.slider = slider.id;
+
+            const thumb = document.createElement('div');
+            thumb.className = 'slider-thumb';
+            fallback.appendChild(thumb);
+
+            container.innerHTML = '';
+            container.appendChild(fallback);
+
+            // Calculate initial position
+            updateSliderThumb(slider, thumb);
+
+            // Mouse/touch events for dragging
+            let isDragging = false;
+
+            fallback.addEventListener('mousedown', startDrag);
+            fallback.addEventListener('touchstart', startDrag);
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('touchmove', drag);
+            document.addEventListener('mouseup', endDrag);
+            document.addEventListener('touchend', endDrag);
+
+            function startDrag(e) {
+                isDragging = true;
+                e.preventDefault();
+            }
+
+            function drag(e) {
+                if (!isDragging) return;
+
+                const rect = fallback.getBoundingClientRect();
+                let clientY = e.clientY;
+                if (e.type === 'touchmove') {
+                    clientY = e.touches[0].clientY;
+                }
+
+                // Calculate position (0 at bottom, 1 at top for slider)
+                const pos = 1 - ((clientY - rect.top) / rect.height);
+                const clampedPos = Math.max(0, Math.min(1, pos));
+
+                // Convert to slider value
+                const min = parseInt(slider.min);
+                const max = parseInt(slider.max);
+                const value = Math.round(min + clampedPos * (max - min));
+
+                slider.value = value;
+                updateSliderThumb(slider, thumb);
+                handleTankSliderChange();
+            }
+
+            function endDrag() {
+                isDragging = false;
+            }
+        }
+
+        function updateSliderThumb(slider, thumb) {
+            const min = parseInt(slider.min);
+            const max = parseInt(slider.max);
+            const value = parseInt(slider.value);
+            const percent = (value - min) / (max - min);
+
+            // Position thumb (0% at bottom, 100% at top)
+            const thumbHeight = thumb.offsetHeight;
+            const containerHeight = slider.parentElement.offsetHeight;
+            const topPos = (1 - percent) * (containerHeight - thumbHeight);
+
+            thumb.style.top = `${topPos}px`;
+        }
+
+        // Bluetooth connection
+        async function connect() {
+            try {
+                log('Requesting Bluetooth device...', 'info');
+
+                // Request device with Nordic UART Service
+                bluetoothDevice = await navigator.bluetooth.requestDevice({
+                    filters: [{ services: [SERVICE_UUID] }],
+                    optionalServices: [SERVICE_UUID]
+                });
+
+                if (!bluetoothDevice) {
+                    log('No device selected.', 'error');
+                    return;
+                }
+
+                log(`Connecting to ${bluetoothDevice.name || 'ESP32'}...`, 'info');
+
+                // Connect to GATT server
+                server = await bluetoothDevice.gatt.connect();
+
+                // Getservice
+                const service = await server.getPrimaryService(SERVICE_UUID);
+
+                // Get characteristics
+                txCharacteristic = await service.getCharacteristic(TX_CHARACTERISTIC_UUID);
+                rxCharacteristic = await service.getCharacteristic(RX_CHARARACTERISTIC_UUID);
+
+                // Set up notifications for RX
+                await rxCharacteristic.startNotifications();
+                rxCharacteristic.addEventListener('characteristicvaluechanged', handleNotification);
+
+                // Update UI
+                isConnected = true;
+                updateConnectionStatus(true);
+                log(`Connected to ${bluetoothDevice.name || 'ESP32'}!`, 'sent');
+
+                // Set up disconnect handler
+                bluetoothDevice.addEventListener('gattserverdisconnected', handleDisconnected);
+
+                // Disable connect button, enable disconnect
+                connectBtn.disabled = true;
+                disconnectBtn.disabled = false;
+
+                // Request MTU for better throughput (optional)
+                try {
+                    await server.requestMTU(512);
+                    log('MTU set to 512', 'info');
+                } catch (e) {
+                    // MTU not supported, continue anyway
+                }
+
+            } catch (error) {
+                log(`Connection failed: ${error.message}`, 'error');
+                console.error(error);
+            }
+        }
+
+        async function disconnect() {
+            if (bluetoothDevice && bluetoothDevice.gatt.connected) {
+                await bluetoothDevice.gatt.disconnect();
+            }
+            handleDisconnected();
+        }
+
+        function handleDisconnected() {
+            isConnected = false;
+            updateConnectionStatus(false);
+            log('Disconnected from device', 'info');
+
+            // Clear any active tank stop interval
+            if (stopInterval) {
+                clearInterval(stopInterval);
+                stopInterval = null;
+            }
+
+            // Re-enable connect button, disable disconnect
+            connectBtn.disabled = false;
+            disconnectBtn.disabled = true;
+
+            // Reset characteristics
+            txCharacteristic = null;
+            rxCharacteristic = null;
+        }
+
+        function handleNotification(event) {
+            const value = event.target.value;
+            const decoder = new TextDecoder();
+            const message = decoder.decode(value).trim();
+
+            if (message) {
+                log(`Received: ${message}`, 'received');
+            }
+        }
+
+        async function sendCommand(command) {
+            if (!isConnected || !txCharacteristic) {
+                log('Cannot send: Not connected', 'error');
+                return false;
+            }
+
+            try {
+                // Add newline as per protocol
+                const data = new TextEncoder().encode(command + '\n');
+                await txCharacteristic.writeValueWithoutResponse(data);
+                log(`Sent: ${command}`, 'sent');
+                return true;
+            } catch (error) {
+                log(`Send failed: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        function handleTankSliderChange() {
+            const left = parseInt(leftSlider.value);
+            const right = parseInt(rightSlider.value);
+
+            // Update value displays
+            leftValue.textContent = left;
+            rightValue.textContent = right;
+
+            // Send tank command
+            if (left === 0 && right === 0) {
+                // Both sliders at zero - send stop command
+                sendCommand('ts');
+
+                // Start/keep alive interval for stop command (every 2 seconds as per protocol)
+                startStopInterval();
+            } else {
+                // Clear any stop interval since we're moving
+                if (stopInterval) {
+                    clearInterval(stopInterval);
+                    stopInterval = null;
+                }
+
+                // Send tank motor command
+                // Format: tms<L><R> (no separator between values)
+                const command = `tms${left}${right}`;
+                sendCommand(command);
+                lastTankCommand = command;
+            }
+        }
+
+        function startStopInterval() {
+            if (stopInterval) return; // Already running
+
+            stopInterval = setInterval(() => {
+                if (isConnected) {
+                    sendCommand('ts');
+                } else {
+                    clearInterval(stopInterval);
+                    stopInterval = null;
+                }
+            }, 2000); // Every 2 seconds as per protocol requirement
+        }
+
+        function updateConnectionStatus(connected) {
+            if (connected) {
+                statusIndicator.className = 'status-indicator connected';
+                statusText.textContent = `Connected to ${bluetoothDevice.name || 'ESP32'}`;
+                statusText.style.color = '#22c55e';
+            } else {
+                statusIndicator.className = 'status-indicator disconnected';
+                statusText.textContent = 'Disconnected';
+                statusText.style.color = '#ef4444';
+            }
+        }
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${type}`;
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            logContent.appendChild(logEntry);
+            logContent.scrollTop = logContent.scrollHeight;
+
+            // Keep only last 100 entries
+            if (logContent.children.length > 100) {
+                logContent.removeChild(logContent.firstChild);
+            }
+        }
+
+        function showHelp() {
+            helpOverlay.classList.add('visible');
+            helpText.classList.add('visible');
+        }
+
+        function hideHelp() {
+            helpOverlay.classList.remove('visible');
+            helpText.classList.remove('visible');
+        }
+
+        // Initialize when page loads
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
