@@ -28,7 +28,7 @@ jobs:
         path: |
           ~/.gradle/caches
           ~/.gradle/wrapper
-        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', 'gradle/wrapper/gradle-wrapper.properties') }}
+        key: ${{ runner.os }}-gradle-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
 
     - name: Make gradlew executable
       run: chmod +x gradlew
@@ -40,6 +40,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: tank-apk
-        path: |
-          app/build/outputs/apk/debug/*.apk
-          app/build/outputs/apk/**/*.apk
+        path: app/build/outputs/apk/debug/*.apk
