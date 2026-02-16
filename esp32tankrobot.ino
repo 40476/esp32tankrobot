@@ -7,7 +7,7 @@
    * Pin Configuration:
    * TANK:   ENA=12, IN1=13, IN2=14, ENB=25, IN3=26, IN4=27
    * CLAW:   IN1=16, IN2=17, IN3=18, IN4=19  (ENA/ENB hardwired to 5V)
-   * REACH:  IN1=21, IN2=22, IN3=32, IN4=33  (ENA/ENB hardwired to 5V)
+   * REACH:  IN1=36, IN2=39, IN3=32, IN4=33  (ENA/ENB hardwired to 5V)
    *
    * Total pins: 14 (all used)
    *
@@ -87,6 +87,11 @@ String bleCommandBuffer = "";
 // ===== BUZZER PWM SETUP =====
 const int BUZZER_LEDC_CH = 2;  // Use LEDC channel 2 for buzzer
 const int BUZZER_DUTY = 128;   // 50% duty cycle (0-255)
+
+// ===== FUNCTION FORWARD DECLARATIONS =====
+void buzzerTone(int frequency, int durationMs);
+void sendBLE(String msg);
+void log(String msg);
 
 // ===== BLE CALLBACK CLASSES =====
 class MyBLEServerCallbacks: public BLEServerCallbacks {
