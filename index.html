@@ -605,6 +605,10 @@ localhost)</p>
     </div>
 
     <script>
+            const RX_CHARACTERISTIC_UUID = '6e400003-b5a3-f393-e0a9-e50e24dcca9e'; // Notify
+        const TX_CHARACTERISTIC_UUID = '6e400002-b5a3-f393-e0a9-e50e24dcca9e'; // Write
+        const SERVICE_UUID = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
+
         // Global variables
         let bluetoothDevice = null;
         let server = null;
@@ -632,9 +636,6 @@ localhost)</p>
         const closeHelp = document.getElementById('closeHelp');
 
         // UUIDs for Nordic UART Service (NUS) - standard for BLE serial
-        const SERVICE_UUID = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
-        const TX_CHARACTERISTIC_UUID = '6e400002-b5a3-f393-e0a9-e50e24dcca9e'; // Write
-        const RX_CHARACTERISTIC_UUID = '6e400003-b5a3-f393-e0a9-e50e24dcca9e'; // Notify
 
         // Initialize
         function init() {
