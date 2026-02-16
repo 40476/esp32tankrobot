@@ -1,4 +1,5 @@
  android {
+    namespace 'io.github.usr40k.esp32tankrobot'
      compileSdk 34
 
      defaultConfig {
