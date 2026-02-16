@@ -63,16 +63,24 @@
             height: 12px;
             border-radius: 50%;
             display: inline-block;
+            transition: all 0.3s ease;
         }
 
         .connected {
             background-color: #22c55e;
             box-shadow: 0 0 8px #22c55e;
+            animation: pulse 2s infinite;
         }
 
         .disconnected {
             background-color: #ef4444;
             box-shadow: 0 0 8px #ef4444;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
         }
 
         .btn {
@@ -92,6 +100,11 @@
 
         .btn-primary:hover {
             background: #0284c7;
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:active {
+            transform: translateY(1px);
         }
 
         .btn-danger {
@@ -101,11 +114,13 @@
 
         .btn-danger:hover {
             background: #dc2626;
+            transform: translateY(-1px);
         }
 
         .btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
+            transform: none !important;
         }
 
         .controller-ui {
@@ -148,6 +163,7 @@
             color: #22c55e;
             min-width: 60px;
             text-align: center;
+            border: 1px solid #334155;
         }
 
         .vertical-slider-container {
@@ -155,6 +171,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            position: relative;
         }
 
         .vertical-slider {
@@ -167,31 +184,32 @@
             outline: none;
             writing-mode: bt-lr; /* IE */
             -webkit-appearance: slider-vertical; /* WebKit */
-        }
-
-        /* Fallback for browsers that don't support vertical sliders */
-        .vertical-slider-fallback {
-            width: 40px;
-            height: 250px;
-            background: #475569;
-            border-radius: 20px;
-            position: relative;
             cursor: pointer;
         }
 
-        .slider-thumb {
-            position: absolute;
+        .vertical-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
             width: 50px;
             height: 25px;
             background: #0ea5e9;
             border-radius: 4px;
-            left: -5px;
             cursor: grab;
             border: 2px solid #38bdf8;
         }
 
-        .slider-thumb:active {
+        .vertical-slider::-webkit-slider-thumb:active {
             cursor: grabbing;
+            background: #0284c7;
+        }
+
+        .vertical-slider::-moz-range-thumb {
+            width: 50px;
+            height: 25px;
+            background: #0ea5e9;
+            border-radius: 4px;
+            cursor: grab;
+            border: 2px solid #38bdf8;
         }
 
         .center-controls {
@@ -236,26 +254,32 @@
             align-items: center;
             gap: 2px;
             position: relative;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
         }
 
         .control-btn:hover {
             background: #475569;
             transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
         .control-btn:active {
             transform: translateY(0);
             background: #1e293b;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .control-btn.active {
+            background: #0ea5e9 !important;
+            box-shadow: 0 0 15px rgba(14, 165, 233, 0.6);
+            border-color: #38bdf8;
         }
 
         .control-btn span {
             font-size: 0.7rem;
             color: #94a3b8;
-        }
-
-        .control-btn.active {
-            background: #0ea5e9 !important;
-            box-shadow: 0 0 10px rgba(14, 165, 233, 0.5);
         }
 
         .main-actions {
@@ -298,7 +322,7 @@
         }
 
         #logContent {
-            font-family: monospace;
+            font-family: 'Courier New', monospace;
             font-size: 0.9rem;
             line-height: 1.4;
             color: #a5f3fc;
@@ -308,6 +332,7 @@
 
         .log-entry {
             margin-bottom: 3px;
+            padding: 2px 0;
         }
 
         .log-sent {
@@ -320,6 +345,10 @@
 
         .log-error {
             color: #f87171;
+        }
+
+        .log-system {
+            color: #c084fc;
         }
 
         .help-text {
@@ -342,6 +371,18 @@
 
         .help-text.visible {
             display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -60%);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
         }
 
         .help-overlay {
@@ -353,6 +394,7 @@
             height: 100%;
             background: rgba(0, 0, 0, 0.7);
             z-index: 999;
+            backdrop-filter: blur(2px);
         }
 
         .help-overlay.visible {
@@ -379,10 +421,13 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            border-radius: 4px;
+            transition: all 0.2s;
         }
 
         .close-help:hover {
             color: white;
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .help-content {
@@ -393,14 +438,17 @@
         .help-content h3 {
             color: #38bdf8;
             margin: 15px 0 8px 0;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #334155;
         }
 
         .help-content code {
             background: #334155;
-            padding: 2px 5px;
+            padding: 2px 6px;
             border-radius: 3px;
-            font-family: monospace;
+            font-family: 'Courier New', monospace;
             color: #fbbf24;
+            font-weight: bold;
         }
 
         .help-content ul {
@@ -409,7 +457,16 @@
         }
 
         .help-content li {
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            padding-left: 5px;
+        }
+
+        .help-content .warning {
+            background: rgba(239, 68, 68, 0.2);
+            border-left: 3px solid #ef4444;
+            padding: 10px;
+            margin: 15px 0;
+            border-radius: 0 4px 4px 0;
         }
 
         .footer {
@@ -440,28 +497,60 @@
                 height: 200px;
             }
 
-            .slider-thumb {
+            .vertical-slider::-webkit-slider-thumb {
+                width: 40px;
+                height: 20px;
+            }
+
+            .vertical-slider::-moz-range-thumb {
+                width: 40px;
                 height: 20px;
             }
         }
 
-        /* Button active state for press-and-hold */
-        .control-btn.active {
-            background: #0ea5e9 !important;
-            box-shadow: 0 0 10px rgba(14, 165, 233, 0.5);
+        /* Loading spinner */
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .status-text {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .connection-type {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-left: 10px;
         }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>ESP32 Tank Robot Controller</h1>
-        <div class="subtitle">Bluetooth Low Energy Control</div>
+        <div class="subtitle">Dual Bluetooth Control (Classic + BLE)</div>
     </div>
 
     <div class="status-bar">
         <div class="connection-status">
             <span class="status-indicator disconnected" id="statusIndicator"></span>
-            <span id="statusText">Disconnected</span>
+            <div class="status-text">
+                <span id="statusText">Disconnected</span>
+                <span class="connection-type" id="connectionType"></span>
+            </div>
         </div>
         <div>
             <button class="btn btn-primary" id="connectBtn">Connect to Robot</button>
@@ -474,7 +563,7 @@
         <div class="tank-control">
             <div class="tank-label">LEFT MOTOR</div>
             <div class="vertical-slider-container">
-                <input type="range" min="-200" max="200" value="0" class="vertical-slider" id="leftSlider">
+                <input type="range" min="-200" max="200" value="0" class="vertical-slider" id="leftSlider" step="10">
             </div>
             <div class="value-display" id="leftValue">0</div>
         </div>
@@ -486,11 +575,11 @@
                 <h3>CLAW GRAB (M0)</h3>
                 <div class="buttons-grid">
                     <button class="control-btn" data-motor="0" data-action="f">
-                        Forward (F)
+                        Forward
                         <span>Hold to move</span>
                     </button>
                     <button class="control-btn" data-motor="0" data-action="b">
-                        Backward (B)
+                        Backward
                         <span>Hold to move</span>
                     </button>
                 </div>
@@ -501,11 +590,11 @@
                 <h3>CLAW ROTATE (M1)</h3>
                 <div class="buttons-grid">
                     <button class="control-btn" data-motor="1" data-action="f">
-                        Forward (F)
+                        Forward
                         <span>Hold to move</span>
                     </button>
                     <button class="control-btn" data-motor="1" data-action="b">
-                        Backward (B)
+                        Backward
                         <span>Hold to move</span>
                     </button>
                 </div>
@@ -543,7 +632,7 @@
         <div class="tank-control">
             <div class="tank-label">RIGHT MOTOR</div>
             <div class="vertical-slider-container">
-                <input type="range" min="-200" max="200" value="0" class="vertical-slider" id="rightSlider">
+                <input type="range" min="-200" max="200" value="0" class="vertical-slider" id="rightSlider" step="10">
             </div>
             <div class="value-display" id="rightValue">0</div>
         </div>
@@ -569,12 +658,14 @@
             <button class="close-help" id="closeHelp">&times;</button>
         </div>
         <div class="help-content">
-            <h3>TANK CONTROL (with PWM speed control 0-200)</h3>
+            <h3>TANK CONTROL (with PWM speed control -200 to +200)</h3>
             <ul>
                 <li><code>ts</code> - Stop tank (sent automatically when sliders released)</li>
-                <li><code>tms &lt;L&gt; &lt;R&gt;</code> - Set tank motors (e.g., <code>tms 150 -100</code>)</li>
+                <li><code>tms &lt;L&gt; &lt;R&gt;</code> - Set tank motors separately (supports negative values!)</li>
+                <li><strong>Examples:</strong> <code>tms 150 -100</code>, <code>tms-50,100</code>, <code>tms -200
+200</code></li>
                 <li><strong>Tank sliders:</strong> Hold to move, release to stop</li>
-                <li>Note: Speeds 0-200. Negative values = reverse.</li>
+                <li><strong>Note:</strong> Positive values = forward, negative values = reverse</li>
             </ul>
 
             <h3>CLAW & REACH (always full speed)</h3>
@@ -594,13 +685,24 @@
                 <li><code>status</code> - Print current status</li>
             </ul>
 
+            <div class="warning">
+                <strong>⚠️ Safety Notes:</strong><br>
+                • Robot will <strong>STOP IMMEDIATELY</strong> if Bluetooth disconnects<br>
+                • Different buzzer tones indicate connection status<br>
+                • Keep robot in visible area while controlling<br>
+                • Emergency stop button stops all motors immediately
+            </div>
+
             <p><strong>Note:</strong> Commands must be terminated with newline (automatic).</p>
+            <p><strong>Compatibility:</strong> Requires Chrome/Edge browser with Web Bluetooth support (HTTPS or
+localhost only)</p>
         </div>
     </div>
 
     <div class="footer">
         <p>Web Bluetooth Controller for ESP32 Tank Robot | Uses Web Bluetooth API (requires Chrome/Edge on HTTPS or
 localhost)</p>
+        <p style="margin-top: 5px; font-size: 0.8rem;">Bluetooth Classic + BLE Dual Mode | v2.0</p>
     </div>
 
     <script>
@@ -616,6 +718,7 @@ localhost)</p>
         let rxCharacteristic = null;
         let stopInterval = null;
         let isConnected = false;
+        let connectionType = 'none'; // 'ble', 'classic', or 'both'
 
         // Track which motor action buttons are currently pressed
         const motorButtonStates = {
@@ -634,6 +737,7 @@ localhost)</p>
         const rightValue = document.getElementById('rightValue');
         const statusIndicator = document.getElementById('statusIndicator');
         const statusText = document.getElementById('statusText');
+        const connectionTypeDisplay = document.getElementById('connectionType');
         const logContent = document.getElementById('logContent');
         const logContainer = document.getElementById('logContainer');
         const toggleLogBtn = document.getElementById('toggleLogBtn');
@@ -650,6 +754,7 @@ localhost)</p>
             if (!navigator.bluetooth) {
                 log('Web Bluetooth not supported in this browser. Use Chrome or Edge.', 'error');
                 connectBtn.disabled = true;
+                connectBtn.textContent = 'Bluetooth Not Supported';
                 return;
             }
 
@@ -657,11 +762,21 @@ localhost)</p>
             connectBtn.addEventListener('click', connect);
             disconnectBtn.addEventListener('click', disconnect);
 
-            // Tank slider control with reset on release
+            // Tank slider control with reset on release (mobile-friendly)
             leftSlider.addEventListener('input', sendTankCommand);
-            leftSlider.addEventListener('change', () => resetSlider(leftSlider));
+            leftSlider.addEventListener('change', () => {
+                // Small delay to let the input event finish before resetting
+                setTimeout(() => resetSlider(leftSlider), 50);
+            });
+
             rightSlider.addEventListener('input', sendTankCommand);
-            rightSlider.addEventListener('change', () => resetSlider(rightSlider));
+            rightSlider.addEventListener('change', () => {
+                setTimeout(() => resetSlider(rightSlider), 50);
+            });
+
+            // Prevent context menu on long press (mobile)
+            leftSlider.addEventListener('contextmenu', e => e.preventDefault());
+            rightSlider.addEventListener('contextmenu', e => e.preventDefault());
 
             stopAllBtn.addEventListener('click', () => sendCommand('s'));
             helpBtn.addEventListener('click', showHelp);
@@ -703,14 +818,11 @@ localhost)</p>
                     e.preventDefault();
                     handleMotorButtonRelease(motor, action, btn);
                 });
+                btn.addEventListener('touchcancel', (e) => {
+                    e.preventDefault();
+                    handleMotorButtonRelease(motor, action, btn);
+                });
             });
-
-            // Add fallback slider support for browsers without vertical slider support
-            if (!('appearance' in document.documentElement.style) ||
-                (!CSS.supports('appearance', 'slider-vertical') && !CSS.supports('writing-mode', 'vertical-lr'))) {
-                setupSliderFallback(leftSlider);
-                setupSliderFallback(rightSlider);
-            }
 
             log('Ready. Click "Connect to Robot" to pair with your ESP32.', 'info');
         }
@@ -791,86 +903,6 @@ localhost)</p>
             toggleLogBtn.textContent = isCollapsed ? 'Show' : 'Hide';
         }
 
-        // Fallback slider for browsers without native vertical slider support
-        function setupSliderFallback(slider) {
-            const container = slider.parentElement;
-            const fallback = document.createElement('div');
-            fallback.className = 'vertical-slider-fallback';
-            fallback.dataset.slider = slider.id;
-
-            const thumb = document.createElement('div');
-            thumb.className = 'slider-thumb';
-            fallback.appendChild(thumb);
-
-            container.innerHTML = '';
-            container.appendChild(fallback);
-
-            // Calculate initial position
-            updateSliderThumb(slider, thumb);
-
-            // Mouse/touch events for dragging
-            let isDragging = false;
-
-            fallback.addEventListener('mousedown', startDrag);
-            fallback.addEventListener('touchstart', startDrag);
-            document.addEventListener('mousemove', drag);
-            document.addEventListener('touchmove', drag);
-            document.addEventListener('mouseup', endDrag);
-            document.addEventListener('touchend', endDrag);
-
-            function startDrag(e) {
-                isDragging = true;
-                e.preventDefault();
-            }
-
-            function drag(e) {
-                if (!isDragging) return;
-
-                const rect = fallback.getBoundingClientRect();
-                let clientY = e.clientY;
-                if (e.type === 'touchmove') {
-                    clientY = e.touches[0].clientY;
-                }
-
-                // Calculate position (0 at bottom, 1 at top for slider)
-                const pos = 1 - ((clientY - rect.top) / rect.height);
-                const clampedPos = Math.max(0, Math.min(1, pos));
-
-                // Convert to slider value
-                const min = parseInt(slider.min);
-                const max = parseInt(slider.max);
-                const value = Math.round(min + clampedPos * (max - min));
-
-                slider.value = value;
-                updateSliderThumb(slider, thumb);
-                sendTankCommand();
-            }
-
-            function endDrag() {
-                isDragging = false;
-                // Reset slider when drag ends
-                slider.value = 0;
-                updateSliderThumb(slider, thumb);
-                const valueDisplay = slider.id === 'leftSlider' ? leftValue : rightValue;
-                valueDisplay.textContent = '0';
-                sendTankCommand();
-            }
-        }
-
-        function updateSliderThumb(slider, thumb) {
-            const min = parseInt(slider.min);
-            const max = parseInt(slider.max);
-            const value = parseInt(slider.value);
-            const percent = (value - min) / (max - min);
-
-            // Position thumb (0% at bottom, 100% at top)
-            const thumbHeight = thumb.offsetHeight;
-            const containerHeight = slider.parentElement.offsetHeight;
-            const topPos = (1 - percent) * (containerHeight - thumbHeight);
-
-            thumb.style.top = `${topPos}px`;
-        }
-
         // Bluetooth connection
         async function connect() {
             try {
@@ -905,8 +937,9 @@ localhost)</p>
 
                 // Update UI
                 isConnected = true;
+                connectionType = 'ble';
                 updateConnectionStatus(true);
-                log(`Connected to ${bluetoothDevice.name || 'ESP32'}!`, 'sent');
+                log(`Connected to ${bluetoothDevice.name || 'ESP32'} via BLE!`, 'sent');
 
                 // Set up disconnect handler
                 bluetoothDevice.addEventListener('gattserverdisconnected', handleDisconnected);
@@ -914,6 +947,8 @@ localhost)</p>
                 // Disable connect button, enable disconnect
                 connectBtn.disabled = true;
                 disconnectBtn.disabled = false;
+                connectBtn.innerHTML = 'Connected <span class="spinner"></span>';
+                disconnectBtn.innerHTML = 'Disconnect';
 
                 // Request MTU for better throughput (optional)
                 try {
@@ -926,18 +961,27 @@ localhost)</p>
             } catch (error) {
                 log(`Connection failed: ${error.message}`, 'error');
                 console.error(error);
+                connectBtn.innerHTML = 'Connect to Robot';
+                isConnected = false;
+                connectionType = 'none';
+                updateConnectionStatus(false);
             }
         }
 
         async function disconnect() {
             if (bluetoothDevice && bluetoothDevice.gatt.connected) {
-                await bluetoothDevice.gatt.disconnect();
+                try {
+                    await bluetoothDevice.gatt.disconnect();
+                } catch (error) {
+                    console.error('Disconnect error:', error);
+                }
             }
             handleDisconnected();
         }
 
         function handleDisconnected() {
             isConnected = false;
+            connectionType = 'none';
             updateConnectionStatus(false);
             log('Disconnected from device', 'info');
 
@@ -950,6 +994,8 @@ localhost)</p>
             // Re-enable connect button, disable disconnect
             connectBtn.disabled = false;
             disconnectBtn.disabled = true;
+            connectBtn.innerHTML = 'Connect to Robot';
+            disconnectBtn.innerHTML = 'Disconnect';
 
             // Reset characteristics
             txCharacteristic = null;
@@ -965,6 +1011,12 @@ localhost)</p>
             document.querySelectorAll('.control-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
+
+            // Reset sliders
+            leftSlider.value = 0;
+            rightSlider.value = 0;
+            leftValue.textContent = '0';
+            rightValue.textContent = '0';
         }
 
         function handleNotification(event) {
@@ -1011,17 +1063,22 @@ localhost)</p>
         function updateConnectionStatus(connected) {
             if (connected) {
                 statusIndicator.className = 'status-indicator connected';
-                statusText.textContent = `Connected to ${bluetoothDevice.name || 'ESP32'}`;
+                const deviceName = bluetoothDevice?.name || 'ESP32';
+                statusText.textContent = `Connected to ${deviceName}`;
                 statusText.style.color = '#22c55e';
+                connectionTypeDisplay.textContent = connectionType === 'ble' ? '(BLE)' : '';
+                connectionTypeDisplay.style.color = '#38bdf8';
             } else {
                 statusIndicator.className = 'status-indicator disconnected';
                 statusText.textContent = 'Disconnected';
                 statusText.style.color = '#ef4444';
+                connectionTypeDisplay.textContent = '';
             }
         }
 
         function log(message, type = 'info') {
-            const timestamp = new Date().toLocaleTimeString();
+            const timestamp = new Date().toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit',
+second: '2-digit' });
             const logEntry = document.createElement('div');
             logEntry.className = `log-entry log-${type}`;
             logEntry.textContent = `[${timestamp}] ${message}`;
@@ -1043,6 +1100,15 @@ localhost)</p>
             helpOverlay.classList.remove('visible');
             helpText.classList.remove('visible');
         }
+
+        // Handle page visibility changes to stop motors if page hidden (safety feature)
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && isConnected) {
+                // Page is hidden, send emergency stop
+                sendCommand('s');
+                log('Page hidden - emergency stop sent', 'system');
+            }
+        });
 
         // Initialize when page loads
         window.addEventListener('load', init);
