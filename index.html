@@ -781,7 +781,7 @@ localhost)</p>
 
                 // Get characteristics
                 txCharacteristic = await service.getCharacteristic(TX_CHARACTERISTIC_UUID);
-                rxCharacteristic = await service.getCharacteristic(RX_CHARARACTERISTIC_UUID);
+                rxCharacteristic = await service.getCharacteristic(RX_CHARACTERISTIC_UUID);
 
                 // Set up notifications for RX
                 await rxCharacteristic.startNotifications();
