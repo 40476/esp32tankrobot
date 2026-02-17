@@ -29,12 +29,12 @@
 BluetoothSerial btSerial;
 
 // ===== TANK MOTORS (Module 1) - WITH PWM =====
-const int TANK_LEFT_ENA = 12;   // PWM ✅ User confirmed works!
-const int TANK_LEFT_IN1 = 13;
-const int TANK_LEFT_IN2 = 14;
-const int TANK_RIGHT_ENB = 27;  // PWM ✅
-const int TANK_RIGHT_IN3 = 26;
-const int TANK_RIGHT_IN4 = 25;
+const int TANK_LEFT_ENA = 27;   // PWM ✅ User confirmed works!
+const int TANK_LEFT_IN1 = 26;
+const int TANK_LEFT_IN2 = 25;
+const int TANK_RIGHT_ENB = 12;  // PWM ✅
+const int TANK_RIGHT_IN3 = 13;
+const int TANK_RIGHT_IN4 = 14;
 
 // ===== CLAW MOTORS (Module 2) - ENA/ENB HARDWIRED TO 5V =====
 const int CLAW_GRAB_IN1 = 16;
@@ -43,8 +43,8 @@ const int CLAW_ROTATE_IN3 = 18;
 const int CLAW_ROTATE_IN4 = 19;
 
 // ===== REACH MOTORS (Module 3) - ENA/ENB HARDWIRED TO 5V =====
-const int REACH_MIDDLE_IN1 = 36;
-const int REACH_MIDDLE_IN2 = 39;
+const int REACH_MIDDLE_IN1 = 2;
+const int REACH_MIDDLE_IN2 = 4;
 const int REACH_BASE_IN3 = 32;
 const int REACH_BASE_IN4 = 33;
 
